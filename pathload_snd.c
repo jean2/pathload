@@ -207,13 +207,22 @@ int main(int argc, char* argv[])
     send_ctr_mesg(ctr_buff, snd_time) ;
 
     /* wait for receiver to start ADR measurement */
+    if ((cmd_train_len = recv_ctr_mesg( ctr_buff))  <= 0 )break;
+    if ( !quiet )
+      printf("ADR train length             :: %ld packets\n",cmd_train_len);
+    if ( (cmd_train_len < 10) || (cmd_train_len > TRAIN_LEN) )
+      cmd_train_len = TRAIN_LEN;
     if((ret_val=recv_ctr_mesg(ctr_buff)) == -1 )break;
     if ( (((ret_val & CTR_CODE) >> 31) == 1) && ((ret_val & 0x7fffffff) == SEND_TRAIN ) ) 
     {
       if ( !quiet)
         printf("Estimating ADR to initialize rate adjustment algorithm => ");
       fflush(stdout);
-      if ( send_train() == -1 ) continue ;
+      if ( send_train() == -1 )
+      {
+	close(ctr_strm);
+	continue ;
+      }
       if ( !quiet)
         printf("Done\n");
     }
@@ -234,6 +243,7 @@ int main(int argc, char* argv[])
         transmission_rate = ret_val ;
         if ((cur_pkt_sz = recv_ctr_mesg( ctr_buff)) <= 0 )break;
         if ((stream_len = recv_ctr_mesg( ctr_buff))  <= 0 )break;
+        if ((num_stream = recv_ctr_mesg( ctr_buff))  <= 0 )break;
         if ((time_interval = recv_ctr_mesg( ctr_buff)) <= 0 )break;
         if ((ret_val = recv_ctr_mesg ( ctr_buff )) == -1 )break;
         /* ret_val = SENd_FLEET */

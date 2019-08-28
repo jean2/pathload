@@ -104,7 +104,13 @@ EXTERN l_int32 max_pkt_sz ;                 /* in bytes */
 EXTERN l_int32 rcv_max_pkt_sz ;             /* in bytes */
 EXTERN l_int32 snd_max_pkt_sz ;             /* in bytes */
 EXTERN l_int32 num_stream ;
+EXTERN l_int32 cmd_num_stream ;
 EXTERN l_int32 stream_len ;                 /* in packets */
+EXTERN l_int32 cmd_stream_len ;             /* in packets */
+EXTERN l_int32 cmd_train_len ;              /* in packets */
+EXTERN l_int32 cmd_max_fleets ;
+EXTERN l_uint32 overhead ;                  /* in bytes */
+EXTERN l_int32 cmd_max_overhead ;           /* in bytes */
 
 EXTERN l_int32 verbose ;
 EXTERN l_int32 Verbose ;

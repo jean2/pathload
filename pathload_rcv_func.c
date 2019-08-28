@@ -90,6 +90,7 @@ double get_adr()
   fflush(stdout);
   fprintf(pathload_fp,"  ADR [");
   fflush(pathload_fp);
+  send_ctr_mesg(ctr_buff, cmd_train_len);
   ctr_code = SEND_TRAIN | CTR_CODE ;
   send_ctr_mesg(ctr_buff, ctr_code);
   exp_train_id = 0 ;
@@ -103,7 +104,8 @@ double get_adr()
     if ( train_len == 5)
       train_len = 3;
     else 
-      train_len = TRAIN_LEN - exp_train_id*15;
+      train_len = (TRAIN_LEN - exp_train_id*15) * cmd_train_len / TRAIN_LEN;
+    overhead += train_len * max_pkt_sz;
     if (Verbose)
       printf(".");
     fflush(stdout);
@@ -584,7 +586,7 @@ K=%ldpackets, T=%ldusec\n",tr, cur_pkt_sz , stream_len,time_interval);
         else
         {
           len=eliminate_rcvr_side_CS(arrv_tm,owd,owdfortd,low,high,&num_rcvr_cs[stream_cnt-1],&tmp_b2b);
-          if ( len > MIN_STREAM_LEN )
+          if ( ( len > MIN_STREAM_LEN ) || ( len >= (stream_len - 1)) )
           {
             get_trend(owdfortd,len);
           }
@@ -637,7 +639,7 @@ void print_contextswitch_info(l_int32 num_sndr_cs[], l_int32 num_rcvr_cs[],l_int
       printf("  # of CS @ sndr        :: ");
     fprintf(pathload_fp,"  # of CS @ sndr        :: ");
     
-    for(j=0;j<stream_cnt-1;j++)
+    for(j=0;j<stream_cnt;j++)
     {
       if (Verbose) printf(":%2d",num_sndr_cs[j]);
       fprintf(pathload_fp,":%2d",num_sndr_cs[j]);
@@ -647,7 +649,7 @@ void print_contextswitch_info(l_int32 num_sndr_cs[], l_int32 num_rcvr_cs[],l_int
     if (Verbose)
       printf("  # of CS @ rcvr        :: ");
     fprintf(pathload_fp,"  # of CS @ rcvr        :: ");
-    for(j=0;j<stream_cnt-1;j++)
+    for(j=0;j<stream_cnt;j++)
     {
       if (Verbose) printf(":%2d",num_rcvr_cs[j]);
       fprintf(pathload_fp,":%2d",num_rcvr_cs[j]);
@@ -658,7 +660,7 @@ void print_contextswitch_info(l_int32 num_sndr_cs[], l_int32 num_rcvr_cs[],l_int
     if (Verbose)
       printf("  # of DS @ rcvr        :: ");
     fprintf(pathload_fp,"  # of DS @ rcvr        :: ");
-    for(j=0;j<stream_cnt-1;j++)
+    for(j=0;j<stream_cnt;j++)
     {
       if (Verbose) printf(":%2d",discard[j]);
       fprintf(pathload_fp,":%2d",discard[j]);
@@ -1703,6 +1705,34 @@ void terminate_gracefully(struct timeval exp_start_time)
       fprintf(pathload_fp,"Exiting due to grey bw resolution\n");
       min = grey_min ; max = grey_max;
     }
+    else if ( !interrupt_coalescence && (cmd_max_fleets != 0) && (exp_fleet_id > cmd_max_fleets) )
+    {
+      if (Verbose)
+        printf("Exiting due to maximum number of fleets\n");
+      fprintf(pathload_fp,"Exiting due to maximum number of fleets\n");
+      if ( grey_min && grey_max)
+      {
+        min = grey_min ; max = grey_max ;
+      }
+      else
+      {
+        min = tr_min ; max = tr_max ;
+      }
+    }
+    else if ( !interrupt_coalescence && (cmd_max_overhead != 0) && (overhead > cmd_max_overhead) )
+    {
+      if (Verbose)
+        printf("Exiting due to maximum overhead\n");
+      fprintf(pathload_fp,"Exiting due to maximum overhead\n");
+      if ( grey_min && grey_max)
+      {
+        min = grey_min ; max = grey_max ;
+      }
+      else
+      {
+        min = tr_min ; max = tr_max ;
+      }
+    }
     else
     {
       min = tr_min ; max = tr_max;
@@ -1733,6 +1763,11 @@ void terminate_gracefully(struct timeval exp_start_time)
     fprintf(pathload_fp,"Measurements finished at %s \n",  buff);
     fprintf(pathload_fp,"Measurement latency is %.2f sec \n", time_to_us_delta(exp_start_time, exp_end_time) / 1000000);
   }
+  if (verbose || Verbose)
+  {
+    printf("Overhead : %d bytes (%d KB)\n", overhead, overhead / 1024);
+  }
+  fprintf(pathload_fp,"Overhead : %d bytes (%d KB)\n", overhead, overhead / 1024);
 
   if (netlog)
     fclose(netlog_fp);
