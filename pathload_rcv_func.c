@@ -1644,10 +1644,14 @@ void terminate_gracefully(struct timeval exp_start_time)
       printf("Avail-bw > maximum sending rate.\n");
       if ( tr_min)
         printf("Avail-bw > %.2f (Mbps)\n", tr_min);
+      printf("Measurements finished at %s \n",  buff);
+      printf("Measurement latency is %.2f sec \n", time_to_us_delta(exp_start_time, exp_end_time) / 1000000);
     }
     fprintf(pathload_fp,"Avail-bw > maximum sending rate.\n");
     if ( tr_min)
       fprintf(pathload_fp,"Avail-bw > %.2f (Mbps)\n", tr_min);
+    fprintf(pathload_fp,"Measurements finished at %s \n",  buff);
+    fprintf(pathload_fp,"Measurement latency is %.2f sec \n", time_to_us_delta(exp_start_time, exp_end_time) / 1000000);
   }
   else if (bad_fleet_cs && !interrupt_coalescence)
   {
