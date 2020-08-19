@@ -124,7 +124,7 @@ int send_fleet()
     {
       gettimeofday(&tmp2, NULL) ;
       t2 = (double) tmp2.tv_sec * 1000000.0 +(double)tmp2.tv_usec ;
-    }while((t2 - t1) < 8000 ) ;
+    }while((t2 - t1) < 2000 ) ;
     ctr_code = FINISHED_STREAM | CTR_CODE ;
     if ( send_ctr_mesg(ctr_buff, ctr_code ) == -1 ) 
     {
