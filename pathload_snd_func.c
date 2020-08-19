@@ -66,7 +66,7 @@ int send_fleet()
   for (i=0; i<cur_pkt_sz-1; i++) pkt_buf[i]=(char)(random()&0x000000ff);
   pkt_id = 0 ;
   if ( !quiet)
-    printf("Sending fleet %ld [%d*%d*%d] ",fleet_id,num_stream,stream_len,cur_pkt_sz);
+    printf("Sending fleet %ld [%d*%d*%d] <%ld> ",fleet_id,num_stream,stream_len,cur_pkt_sz, time_interval);
   while ( stream_cnt < num_stream )
   {
     if ( !quiet) printf("#");
@@ -159,6 +159,8 @@ int send_fleet()
     {
       /* release cpu if inter-stream gap is longer than min_sleep_time
       */
+      /* This is not working as intended, disable - Jean II */
+      /*
       if ( t2 - t1 - stream_duration * 9 > min_sleep_interval )
       {
         sleep_tm_usec = time_interval - tmp - 
@@ -169,6 +171,7 @@ int send_fleet()
         gettimeofday(&tmp2,NULL) ;
         t2 = (double) tmp2.tv_sec * 1000000.0 +(double)tmp2.tv_usec ;
       }
+      */
       /* busy wait for the remaining time */
       do
       {
