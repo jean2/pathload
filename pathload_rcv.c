@@ -406,12 +406,16 @@ int main(l_int32 argc, char *argv[])
         if (rate_adjustment(INCREASING) == -1)
           terminate_gracefully(exp_start_time);
       }
+      if ( (cmd_max_fleets != 0) && (exp_fleet_id > cmd_max_fleets) )
+        terminate_gracefully(exp_start_time) ;	
+      if ( (cmd_max_overhead != 0) && (overhead > cmd_max_overhead) )
+        terminate_gracefully(exp_start_time) ;	
     }
     else
     {
       get_sending_rate() ;
       trend = aggregate_trend_result();
-      
+
       if ( (cmd_max_fleets != 0) && (exp_fleet_id > cmd_max_fleets) )
         terminate_gracefully(exp_start_time) ;	
       if ( (cmd_max_overhead != 0) && (overhead > cmd_max_overhead) )
